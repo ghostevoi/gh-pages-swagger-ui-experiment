@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  title: API для управления товарами и заказами
+  license:
+    name: Apache 2.0
+    url: https://www.apache.org/licenses/LICENSE-2.0.html
+  version: 0.0.1
+servers:
+  - url: http://localhost:8080/api/v1/
+    description: Dev server  
+  
+paths:
+  /products:
+    get:
+      summary: Метод получения Товара
+      description: Метод предназначен для получения списка всех товаров, сохраненных в БД.
+      operationId: getproducts
+      tags:
+        - product
+      responses:
+        '200':
+          "description": Список товаров
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/products"
+        400:
+          description: Неудалось выполнить запрос
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    post:
+      summary: Метод добавления новой товара в каталог
+      description: Метод предназначен для сохранения в БД данных по новой товара.
+      operationId: createproduct
+      tags:
+        - product
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: "#/components/schemas/product"
+      responses:
+        '200':
+          "description": Подтверждение успешного сохранения
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/product"
+        '400':
+          "description": Некорректные входные данные. Возвращает список атрибутов с ошибками
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+
+  /products/{id}:
+    get:
+      summary: Метод получения товара по идентификатору
+      operationId: getproductById
+      tags:
+        - product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор товара
+          schema:
+            type: string
+      responses:
+        '200':
+          "description": Товар
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/product"
+        300:
+          description: Неправильно задан индефикатор
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    put:
+      summary: Метод обновления товара в каталоге
+      description: Метод предназначен для обновления в БД данных по имеющейся товара.
+      operationId: updateproduct
+      tags:
+        - product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор товара
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          'application/json':
+            schema:
+              $ref: "#/components/schemas/product"
+      responses:
+        '200':
+          "description": Подтверждение успешного обновления
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/product"
+        '400':
+          "description": Некорректные входные данные. Возвращает список атрибутов с ошибками
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: string
+    
+    delete:
+      summary: Метод удаления товара по идентификатору
+      operationId: deleteproductById
+      tags:
+        - product
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Идентификатор товара
+          schema:
+            type: string
+      responses:
+        '200':
+          "description": Успешное удаление
+          content:
+            'application/json': {}
+        500:
+          description: Неудалось удалить товар
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    product:
+      type: object
+      required:
+        - name
+        - status
+      properties:
+        product_id:
+          type: string
+          example: 1
+        name:
+          description: Название товара
+          type: string
+          example: Дверь
+        created_at:
+          description: Дата и время сохранения товара в каталоге
+          type: string
+          example: 2022-07-01T15:00:00+01
+    products:
+      type: array
+      items:
+        $ref: "#/components/schemas/product"
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
